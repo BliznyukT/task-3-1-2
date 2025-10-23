@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Информация о пользователе</title>
+</head>
+<body>
+<h1>Информация о пользователе</h1>
+<p><strong>Id: </strong> <span th:text="${user.id}"></span></p>
+<p><strong>Имя: </strong> <span th:text="${user.name}"></span></p>
+<p><strong>Фамилия: </strong> <span th:text="${user.lastName}"></span></p>
+<p><strong>Email: </strong> <span th:text="${user.email}"></span></p>
+<p><strong>Права: </strong> <span th:text="${roleDescription}"></span></p>
+<hr/>
+<br/>
+
+<form th:action="@{/logout}" method="post">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+    <button type="submit">Выйти из аккаунта</button>
+</form>

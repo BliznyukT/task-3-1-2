@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Добавить нового пользователя</title>
+</head>
+<body>
+<h1>Добавить нового пользователя</h1>
+
+<form method="POST" th:action="@{/admin}" th:object="${user}" >
+    <input type="hidden" th:attr="name=${_csrf.parameterName}" th:value="${_csrf.token}">
+    <div>
+        <label for="name">Имя:</label>
+        <input type="text" id="name" th:field="*{name}">
+    </div>
+    <div>
+        <label for="lastName">Фамилия:</label>
+        <input type="text" id="lastName" th:field="*{lastName}">
+    </div>
+    <div>
+        <label for="email">Email:</label>
+        <input type="email" id="email" th:field="*{email}">
+    </div>
+    <div>
+        <label for="username">Username:</label>
+        <input type="text" id="username" th:field="*{username}">
+    </div>
+    <div>
+        <label for="password">Пароль:</label>
+        <input type="password" id="password" th:field="*{password}">
+    </div>
+
+    <div>
+        <label>Роли:</label>
+        <label>
+            <select multiple name="roleIds">
+                <option th:each="role : ${allRoles}" th:value="${role.id}" th:text="${role.name}"></option>
+            </select>
+        </label>
+    </div>
+
+    <br/>
+    <div>
+        <button type="submit">Добавить пользователя</button>
+    </div>
+</form>
+<hr/>
+<br/>
+<button>
+    <a th:href="@{/admin/users}">Вернуться к списку пользователей</a>
+</button>
+<hr/>
+<br/>
+<button>
+    <a th:href="@{/admin}">Вернуться на страницу админа</a>
+</button>
+</body>
+</html>

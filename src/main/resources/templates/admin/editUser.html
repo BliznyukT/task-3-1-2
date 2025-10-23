@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Изменить данные пользователя</title>
+</head>
+<body>
+<h1>Изменить данные пользователя</h1>
+
+<form th:method="POST" th:action="@{/admin/savechanges(id=${user.id})}" th:object="${user}" >
+    <div>
+        <label for="name">Укажите имя пользователя :</label>
+        <input type="text" id="name" th:field="*{name}">
+    </div>
+    <div>
+        <label for="lastname">Укажите фамилию пользователя :</label>
+        <input type="text" id="lastname" th:field="*{lastName}">
+    </div>
+    <div>
+        <label for="email">Укажите email пользователя :</label>
+        <input type="text" id="email" th:field="*{email}">
+    </div>
+    <div>
+        <label for="username">Логин:</label>
+        <input type="text" id="username" th:field="*{username}" required>
+    </div>
+    <div>
+        <label for="password">Новый пароль (если нужно изменить):</label>
+        <input type="password" id="password" th:field="*{password}">
+    </div>
+    <div>
+        <label>Роли:</label><br/>
+        <div th:each="role : ${allRoles}">
+            <label>
+                <input type="checkbox"
+                       th:value="${role.id}"
+                       th:field="*{roles}"
+                       th:checked="${user.roles.contains(role)}">
+            </label>
+            <span th:text="${role.name}"></span><br/>
+        </div>
+
+    <br/>
+    <div>
+        <button type="submit">Обновить данные о пользователе</button>
+    </div>
+</form>
+<br/>
+
+<button>
+    <a th:href="@{/admin/users}">Вернуться к списку пользователей</a>
+</button>
+<br/>
+<form th:action="@{/logout}" method="post">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+    <button type="submit">Выйти из аккаунта</button>
+</form>
+<hr/>
+<br/>
+<button>
+    <a th:href="@{/admin}">Вернуться на страницу админа</a>
+</button>
+</body>
+</html>
