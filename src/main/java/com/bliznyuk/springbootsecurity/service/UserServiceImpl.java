@@ -3,6 +3,9 @@ package com.bliznyuk.springbootsecurity.service;
 import com.bliznyuk.springbootsecurity.model.User;
 import com.bliznyuk.springbootsecurity.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,7 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
-public class UserServiceImpl implements UserService {
+@Transactional
+public class UserServiceImpl implements UserService, UserDetailsService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -21,13 +25,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
+    public boolean existsByRolesName(String roleName) {
+        return userRepository.existsByRolesName(roleName);
+    }
+
+    @Override
     public void addUser(User user) {
         userRepository.save(user);
     }
 
     @Override
-    @Transactional
     public void updateUser(User user) {
         User existingUser = userRepository.findById(user.getId())
                 .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
@@ -46,7 +53,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
     public void deleteUserById(long id) {
         userRepository.deleteById(id);
     }
@@ -61,5 +67,20 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     public List<User> getUsers() {
         return userRepository.findAll();
+    }
+
+    @Override
+    public void save(User user) {
+        if (user.getPassword() == null || user.getPassword().isBlank()) {
+            throw new IllegalArgumentException("Поле \"Пароль\" не может быть пустым");
+        }
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        userRepository.save(user);
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return userRepository.findByUsername(username).orElseThrow(() ->
+                new UsernameNotFoundException("Пользователь не найден: " + username));
     }
 }

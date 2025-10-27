@@ -3,23 +3,23 @@ package com.bliznyuk.springbootsecurity.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.stereotype.Component;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @Getter
 @Setter
 @Entity
-@Component
 @Table
-public class User {
+public class User implements UserDetails {
 
     @Id
     @Column(name = "user_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-
     private String name;
     @Column(name = "lastname")
     private String lastName;
@@ -28,7 +28,7 @@ public class User {
     private String username;
     private boolean enabled = true;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
@@ -57,5 +57,27 @@ public class User {
         return getRoles().stream()
                 .anyMatch(role -> role.getName().equals("ROLE_ADMIN"))
                 ? "Администратор" : "Пользователь";
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return roles != null ? roles.stream()
+                .map(s -> new SimpleGrantedAuthority(s.getName()))
+                .toList() : Collections.emptyList();
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
     }
 }

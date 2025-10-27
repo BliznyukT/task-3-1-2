@@ -2,27 +2,24 @@ package com.bliznyuk.springbootsecurity.util;
 
 import com.bliznyuk.springbootsecurity.model.Role;
 import com.bliznyuk.springbootsecurity.model.User;
-import com.bliznyuk.springbootsecurity.repositories.RoleRepository;
-import com.bliznyuk.springbootsecurity.repositories.UserRepository;
+import com.bliznyuk.springbootsecurity.service.RoleServiceImpl;
+import com.bliznyuk.springbootsecurity.service.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
 
 @Component
 public class AdminRoleInitializer implements CommandLineRunner {
-    private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final UserServiceImpl userService;
+    private final RoleServiceImpl roleService;
 
     @Autowired
-    public AdminRoleInitializer(UserRepository userRepository, RoleRepository roleRepository,
-                                PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
-        this.passwordEncoder = passwordEncoder;
+    public AdminRoleInitializer(
+            UserServiceImpl userService, RoleServiceImpl roleService) {
+        this.userService = userService;
+        this.roleService = roleService;
     }
 
     @Override
@@ -30,24 +27,19 @@ public class AdminRoleInitializer implements CommandLineRunner {
         addRoleIfNotExists("ROLE_USER");
         addRoleIfNotExists("ROLE_ADMIN");
 
-        if (!userRepository.existsByRolesName("ROLE_ADMIN")) {
-            Role adminRole = roleRepository.findByName("ROLE_ADMIN").orElseThrow();
-            Role userRole = roleRepository.findByName("ROLE_USER").orElseThrow();
+        if (!userService.existsByRolesName("ROLE_ADMIN")) {
+            Role adminRole = roleService.findByName("ROLE_ADMIN").orElseThrow();
+            Role userRole = roleService.findByName("ROLE_USER").orElseThrow();
 
-            User defaultAdminUser = new User();
-            defaultAdminUser.setName("admin");
-            defaultAdminUser.setLastName("admin");
-            defaultAdminUser.setEmail("admin@gmail.com");
-            defaultAdminUser.setPassword(passwordEncoder.encode("admin"));
-            defaultAdminUser.setUsername("admin");
-            defaultAdminUser.setRoles(Set.of(userRole, adminRole));
-            userRepository.save(defaultAdminUser);
+            User defaultAdminUser = new User("admin", "admin", "admin@mail.ru",
+                    "admin", "admin", Set.of(userRole, adminRole));
+            userService.save(defaultAdminUser);
         }
     }
 
     private void addRoleIfNotExists(String roleName) {
-        if (roleRepository.findByName(roleName).isEmpty()) {
-            roleRepository.save(new Role(roleName));
+        if (roleService.findByName(roleName).isEmpty()) {
+            roleService.save(new Role(roleName));
         }
     }
 }

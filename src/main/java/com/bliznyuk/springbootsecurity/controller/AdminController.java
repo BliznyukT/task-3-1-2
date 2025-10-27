@@ -4,11 +4,9 @@ package com.bliznyuk.springbootsecurity.controller;
 import com.bliznyuk.springbootsecurity.model.Role;
 import com.bliznyuk.springbootsecurity.model.User;
 import com.bliznyuk.springbootsecurity.repositories.RoleRepository;
-import com.bliznyuk.springbootsecurity.security.MyUserDetails;
 import com.bliznyuk.springbootsecurity.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -20,20 +18,18 @@ import java.util.Set;
 @RequestMapping("admin")
 public class AdminController {
     private final UserService userService;
-    private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
 
     @Autowired
-    public AdminController(UserService userService, PasswordEncoder passwordEncoder, RoleRepository roleRepository) {
+    public AdminController(UserService userService, RoleRepository roleRepository) {
         this.userService = userService;
-        this.passwordEncoder = passwordEncoder;
         this.roleRepository = roleRepository;
     }
 
     @GetMapping
     public String showAdmin(Model model, Authentication authentication) {
-        MyUserDetails myUserDetails = (MyUserDetails) authentication.getPrincipal();
-        model.addAttribute("user", myUserDetails.getUser());
+        User user = (User) authentication.getPrincipal();
+        model.addAttribute("user", user);
         model.addAttribute("roleDescription", "Администратор");
         return "admin/admin";
     }
@@ -45,7 +41,7 @@ public class AdminController {
     }
 
     @GetMapping("/show_user")
-    public String showUserById(@RequestParam ("id") int id, Model model) {
+    public String showUserById(@RequestParam("id") int id, Model model) {
         User user = userService.getUserById(id);
         model.addAttribute("user", user);
         model.addAttribute("roleDescription", user.getRoleDescription());
@@ -60,9 +56,7 @@ public class AdminController {
     }
 
     @PostMapping
-    public String saveUser(User newUser, @RequestParam (value = "roleIds", required = false) Set<Long> roleIds) {
-        newUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
-
+    public String saveUser(User newUser, @RequestParam(value = "roleIds", required = false) Set<Long> roleIds) {
         Set<Role> roles;
         if (roleIds != null && !roleIds.isEmpty()) {
             roles = new HashSet<>(roleRepository.findAllById(roleIds));
@@ -76,20 +70,20 @@ public class AdminController {
     }
 
     @PostMapping("/delete")
-    public String deleteUser(@RequestParam ("id") int id) {
+    public String deleteUser(@RequestParam("id") int id) {
         userService.deleteUserById(id);
         return "redirect:/admin/users";
     }
 
     @GetMapping("/update")
-    public String editUser(@RequestParam ("id") int id, Model model) {
+    public String editUser(@RequestParam("id") int id, Model model) {
         model.addAttribute("user", userService.getUserById(id));
         model.addAttribute("allRoles", roleRepository.findAll());
         return "admin/editUser";
     }
 
     @PostMapping("/savechanges")
-    public String updateUser(@RequestParam("id") int id, User user) {
+    public String updateUser(User user) {
         userService.updateUser(user);
         return "redirect:/admin/users";
     }
