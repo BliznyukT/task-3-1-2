@@ -2,8 +2,8 @@ package com.bliznyuk.springbootsecurity.util;
 
 import com.bliznyuk.springbootsecurity.model.Role;
 import com.bliznyuk.springbootsecurity.model.User;
-import com.bliznyuk.springbootsecurity.service.RoleServiceImpl;
-import com.bliznyuk.springbootsecurity.service.UserServiceImpl;
+import com.bliznyuk.springbootsecurity.service.RoleService;
+import com.bliznyuk.springbootsecurity.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -12,12 +12,12 @@ import java.util.Set;
 
 @Component
 public class AdminRoleInitializer implements CommandLineRunner {
-    private final UserServiceImpl userService;
-    private final RoleServiceImpl roleService;
+    private final UserService userService;
+    private final RoleService roleService;
 
     @Autowired
     public AdminRoleInitializer(
-            UserServiceImpl userService, RoleServiceImpl roleService) {
+            UserService userService, RoleService roleService) {
         this.userService = userService;
         this.roleService = roleService;
     }

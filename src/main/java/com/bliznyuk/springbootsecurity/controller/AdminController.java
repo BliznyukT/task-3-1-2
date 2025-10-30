@@ -3,7 +3,7 @@ package com.bliznyuk.springbootsecurity.controller;
 
 import com.bliznyuk.springbootsecurity.model.Role;
 import com.bliznyuk.springbootsecurity.model.User;
-import com.bliznyuk.springbootsecurity.repositories.RoleRepository;
+import com.bliznyuk.springbootsecurity.service.RoleService;
 import com.bliznyuk.springbootsecurity.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -18,12 +18,12 @@ import java.util.Set;
 @RequestMapping("admin")
 public class AdminController {
     private final UserService userService;
-    private final RoleRepository roleRepository;
+    private final RoleService roleService;
 
     @Autowired
-    public AdminController(UserService userService, RoleRepository roleRepository) {
+    public AdminController(UserService userService, RoleService roleService) {
         this.userService = userService;
-        this.roleRepository = roleRepository;
+        this.roleService = roleService;
     }
 
     @GetMapping
@@ -51,7 +51,7 @@ public class AdminController {
     @GetMapping("/new")
     public String addUser(Model model) {
         model.addAttribute("user", new User());
-        model.addAttribute("allRoles", roleRepository.findAll());
+        model.addAttribute("allRoles", roleService.findAll());
         return "admin/newUser";
     }
 
@@ -59,9 +59,9 @@ public class AdminController {
     public String saveUser(User newUser, @RequestParam(value = "roleIds", required = false) Set<Long> roleIds) {
         Set<Role> roles;
         if (roleIds != null && !roleIds.isEmpty()) {
-            roles = new HashSet<>(roleRepository.findAllById(roleIds));
+            roles = new HashSet<>(roleService.findAllById(roleIds));
         } else {
-            Role defaultRole = roleRepository.findByName("ROLE_USER").orElseThrow();
+            Role defaultRole = roleService.findByName("ROLE_USER").orElseThrow();
             roles = Set.of(defaultRole);
         }
         newUser.setRoles(roles);
@@ -78,7 +78,7 @@ public class AdminController {
     @GetMapping("/update")
     public String editUser(@RequestParam("id") int id, Model model) {
         model.addAttribute("user", userService.getUserById(id));
-        model.addAttribute("allRoles", roleRepository.findAll());
+        model.addAttribute("allRoles", roleService.findAll());
         return "admin/editUser";
     }
 
